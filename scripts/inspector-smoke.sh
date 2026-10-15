@@ -48,7 +48,7 @@ check 'stdio get_account is unauthenticated' '.result.structuredContent.authenti
 
 MNOGOREELS_PORT=$PORT node dist/cli.js --http &
 SERVER_PID=$!
-curl -fs --retry 20 --retry-connrefused --retry-delay 1 "$BASE/healthz" >/dev/null || {
+curl -fs --retry 20 --retry-all-errors --retry-delay 1 "$BASE/healthz" >/dev/null || {
   echo "FAIL http server did not answer $BASE/healthz" >&2
   exit 1
 }
