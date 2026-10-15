@@ -2,6 +2,28 @@
 
 Where the MnogoReels MCP server is listed, in submission order after the first release, with the exact texts to paste. Keep this file in sync when a listing changes.
 
+## Status (2026-10-15)
+
+| # | Directory | State |
+| --- | --- | --- |
+| 1 | npm | Live: `mnogoreels-mcp@1.0.0` |
+| 2 | Official MCP Registry | Live: `ru.mnogo-reels/mnogoreels` 1.0.0 |
+| 3 | GitHub MCP Registry / VS Code | Email sent to partnerships@github.com (cc support@) |
+| 4 | Glama | Indexed; claim the server and the connector (needs GitHub login) |
+| 5 | awesome-mcp-servers | [PR #16540](https://github.com/punkpeye/awesome-mcp-servers/pull/16540) |
+| 6 | awesome-remote-mcp-servers | Waits for the Glama connector page |
+| 7 | Smithery | Needs `smithery auth login` (browser) |
+| 8 | Gemini CLI gallery | Automatic (topic + `gemini-extension.json`) |
+| 9 | Docker MCP Catalog | [PR #5735](https://github.com/docker/mcp-registry/pull/5735); reviewer key on request |
+| 10 | Cline Marketplace | [Issue #3017](https://github.com/cline/mcp-marketplace/issues/3017) |
+| 11 | mcp.so | [Issue #5451](https://github.com/chatmcp/mcpso/issues/5451) |
+| 12 | mcpservers.org / MCP Market | Submitted (free queues); LobeHub and PulseMCP automatic |
+| 13 | Claude plugin directory | Unblocked: privacy section shipped; submit at claude.ai/directory/manage (login) |
+| 14 | Cursor Marketplace / cursor.directory | Needs login |
+| 15 | Goose | [PR #12924](https://github.com/aaif-goose/goose/pull/12924) |
+| 16 | mcpdb.ru | Their form returns HTTP 500; retry later |
+| 16 | neuraldeep.ru | Needs Yandex login |
+
 ## Before you start
 
 - Release `v1.0.0` is published (npm, GHCR, GitHub Release with the `.mcpb`, Official MCP Registry). See [release.md](release.md).
@@ -209,7 +231,7 @@ Local config:
 
 ## 13. Claude plugin directory
 
-**HOLD** until the MnogoReels privacy policy and terms have the "Developer API & integrations (MCP)" section (frontend follow-up B3); the directory checks the privacy URL.
+The privacy policy has the "4.1 Developer API and integrations (MCP)" section since 2026-10-15; the directory checks the privacy URL.
 
 claude.ai/directory/manage → Submit new → **Plugin bundle** → repository `RealSatanyan/mnogoreels-mcp`, plugin path `plugins/mnogoreels`.
 
