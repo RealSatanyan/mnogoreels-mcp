@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2026-10-15
 
 ### Added
 
@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Profiles `default` (19 tools), `readonly` (13) and `directory` (17), toolset selection and read-only mode through environment variables or HTTP headers.
 - Transports: stdio (`npx -y mnogoreels-mcp@latest`) and Streamable HTTP, serving MCP 2026-07-28 and 2025-era clients from one server.
 - Remote endpoint `https://mcp.mnogo-reels.ru/mcp` (plus `/mcp/readonly` and `/mcp/directory`), server card at `/.well-known/mcp/server-card.json`.
-- Packaging: npm package with provenance, multi-arch image `ghcr.io/realsatanyan/mnogoreels-mcp`, Claude Desktop bundle (`.mcpb`), Claude Code plugin and marketplace, Cursor plugin, Gemini CLI extension, Official MCP Registry entry `ru.mnogo-reels/mnogoreels`.
+- Packaging: npm package, multi-arch image `ghcr.io/realsatanyan/mnogoreels-mcp`, Claude Desktop bundle (`.mcpb`), Claude Code plugin and marketplace, Cursor plugin, Gemini CLI extension, Official MCP Registry entry `ru.mnogo-reels/mnogoreels`.
 
 [Unreleased]: https://github.com/RealSatanyan/mnogoreels-mcp/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/RealSatanyan/mnogoreels-mcp/releases/tag/v1.0.0
