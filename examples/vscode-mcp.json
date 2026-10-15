@@ -1,0 +1,17 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "mnogoreels_api_key",
+      "description": "MnogoReels API key (mrfrt_usr_...)",
+      "password": true
+    }
+  ],
+  "servers": {
+    "mnogoreels": {
+      "type": "http",
+      "url": "https://mcp.mnogo-reels.ru/mcp",
+      "headers": { "Authorization": "Bearer ${input:mnogoreels_api_key}" }
+    }
+  }
+}

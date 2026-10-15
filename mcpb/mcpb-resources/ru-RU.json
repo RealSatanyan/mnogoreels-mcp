@@ -1,0 +1,15 @@
+{
+  "display_name": "MnogoReels",
+  "description": "Нарезка длинных видео на вертикальные клипы с субтитрами, транскрипты и статьи в MnogoReels.",
+  "long_description": "Нарезает видео с YouTube, VK Видео, RuTube, Дзена, Twitch, Яндекс Диска и Google Диска на вертикальные Shorts/Reels с субтитрами и хуками, делает транскрипты, статьи и подбирает B-roll, показывает ход обработки. Нужны аккаунт MnogoReels и API-ключ со страницы https://mnogo-reels.ru/dashboard/developers?tab=keys. Платные инструменты всегда сначала считают стоимость и требуют вашего подтверждения.",
+  "user_config": {
+    "api_key": {
+      "title": "API-ключ MnogoReels",
+      "description": "Создайте его на https://mnogo-reels.ru/dashboard/developers?tab=keys (начинается с mrfrt_usr_)"
+    },
+    "read_only": {
+      "title": "Только чтение",
+      "description": "Скрыть инструменты, которые создают задачи или тратят кредиты"
+    }
+  }
+}

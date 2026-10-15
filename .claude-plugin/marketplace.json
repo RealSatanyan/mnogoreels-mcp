@@ -1,0 +1,18 @@
+{
+  "name": "mnogoreels",
+  "owner": {
+    "name": "MnogoReels",
+    "email": "support@mnogo-reels.ru"
+  },
+  "metadata": {
+    "description": "Official MnogoReels plugins: turn long videos into captioned vertical shorts, transcripts and articles."
+  },
+  "plugins": [
+    {
+      "name": "mnogoreels",
+      "source": "./plugins/mnogoreels",
+      "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+      "version": "1.0.0"
+    }
+  ]
+}

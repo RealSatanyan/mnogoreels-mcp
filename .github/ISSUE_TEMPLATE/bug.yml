@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in the MnogoReels MCP server does not work as documented
+labels: [bug]
+body:
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Secrets
+      description: This tracker is public. Never paste an API key, even a revoked one.
+      options:
+        - label: I removed API keys (mrfrt_usr_…) and configs containing secrets from this report
+          required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you asked the assistant to do, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: mnogoreels-mcp version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: How the server runs
+      options:
+        - Local via npx (stdio)
+        - Remote https://mcp.mnogo-reels.ru/mcp
+        - Docker image (ghcr.io/realsatanyan/mnogoreels-mcp)
+        - Claude Desktop extension (.mcpb)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: MCP client and version
+      placeholder: Claude Desktop 1.2.3, Cursor 2.1, VS Code 1.105, ...
+    validations:
+      required: true
+  - type: input
+    id: job-id
+    attributes:
+      label: Job ID, if the problem concerns a job
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error text or logs
+      description: The tool result (it starts with "Error [code]:") or the server's stderr lines.
+      render: text

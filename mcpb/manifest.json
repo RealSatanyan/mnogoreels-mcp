@@ -1,0 +1,116 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "mnogoreels",
+  "display_name": "MnogoReels",
+  "version": "1.0.0",
+  "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+  "long_description": "Clip YouTube, VK Video, RuTube, Dzen, Twitch, Yandex Disk and Google Drive videos into vertical Shorts/Reels with captions and hooks, get transcripts, articles and B-roll, and follow job progress. Requires a MnogoReels account and an API key from https://mnogo-reels.ru/dashboard/developers?tab=keys. Paid tools always quote the price and need your confirmation.",
+  "author": { "name": "MnogoReels", "email": "support@mnogo-reels.ru", "url": "https://mnogo-reels.ru" },
+  "repository": { "type": "git", "url": "https://github.com/RealSatanyan/mnogoreels-mcp.git" },
+  "homepage": "https://mnogo-reels.ru",
+  "documentation": "https://github.com/RealSatanyan/mnogoreels-mcp#readme",
+  "support": "https://github.com/RealSatanyan/mnogoreels-mcp/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/dist/cli.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/dist/cli.js"],
+      "env": { "MNOGOREELS_API_KEY": "${user_config.api_key}", "MNOGOREELS_READ_ONLY": "${user_config.read_only}" }
+    }
+  },
+  "tools": [
+    {
+      "name": "get_account",
+      "description": "Checks whether the configured MnogoReels API key works and shows this server's settings."
+    },
+    {
+      "name": "get_options_guide",
+      "description": "Explains the option values accepted by create_clip_job and recut_clip_job: video modes, clip lengths, caption styles, hook styles, story arc styles, outros, framing and languages, plus the pricing rules and the 30-minute limit per job."
+    },
+    {
+      "name": "check_video_source",
+      "description": "Checks whether MnogoReels can download a video link and returns its title, length and platform."
+    },
+    {
+      "name": "quote_clip_job",
+      "description": "Calculates the credit cost of create_clip_job or recut_clip_job without spending anything, and checks that MnogoReels can download the video."
+    },
+    {
+      "name": "create_clip_job",
+      "description": "Starts AI clipping of a long video into vertical 9:16 short clips with burned-in captions and a hook title, plus optional cold-open hooks, music and B-roll."
+    },
+    {
+      "name": "get_clip_job",
+      "description": "Returns the status, progress and results of a clip job created by create_clip_job, recut_clip_job or on the MnogoReels website."
+    },
+    {
+      "name": "list_clip_jobs",
+      "description": "Lists the user's clip jobs, newest first, including jobs started on the MnogoReels website."
+    },
+    {
+      "name": "recut_clip_job",
+      "description": "Creates a new clip job from the same source video as an existing job, with different settings such as caption style, hook style, clip length, language, framing, music, B-roll or prompt."
+    },
+    {
+      "name": "retry_clip_job",
+      "description": "Re-runs a failed clip job with the same settings, free of charge, keeping the same job_id."
+    },
+    {
+      "name": "create_transcription",
+      "description": "Starts a timed speech-to-text transcription of a video or audio link."
+    },
+    {
+      "name": "get_transcription",
+      "description": "Returns the status and text of a transcription started with create_transcription."
+    },
+    {
+      "name": "create_article",
+      "description": "Turns the source video of a completed clip job into a long-form article: title, SEO title and description, summary, sections, key takeaways, chapters with timestamps, up to 4 frames from the video as illustrations, and the full timed transcript."
+    },
+    {
+      "name": "get_article",
+      "description": "Returns an article created with create_article as Markdown, with its status."
+    },
+    { "name": "search_broll", "description": "Searches B-roll videos and images." },
+    { "name": "get_broll_asset", "description": "Returns one B-roll item by asset_id with fresh links." },
+    { "name": "list_packs", "description": "Lists the user's publication packs, newest first." },
+    {
+      "name": "get_pack",
+      "description": "Returns one publication pack: suggested titles, descriptions, cover texts and hashtags, thumbnail images, teaser videos, the article id and the clip job id."
+    },
+    {
+      "name": "create_youtube_thumbnails",
+      "description": "Generates 1 to 4 AI YouTube thumbnail images (1280×720 JPEG) for a video, using frames from the video plus an optional title and art direction."
+    },
+    {
+      "name": "get_youtube_thumbnails",
+      "description": "Returns the status and images of a thumbnail job started with create_youtube_thumbnails."
+    }
+  ],
+  "tools_generated": false,
+  "prompts_generated": true,
+  "keywords": ["video", "shorts", "reels", "clips", "captions", "transcription", "youtube", "rutube"],
+  "license": "MIT",
+  "privacy_policies": ["https://mnogo-reels.ru/privacy-policy"],
+  "compatibility": { "platforms": ["darwin", "win32", "linux"], "runtimes": { "node": ">=22.0.0" } },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "MnogoReels API key",
+      "description": "Create it at https://mnogo-reels.ru/dashboard/developers?tab=keys (starts with mrfrt_usr_)",
+      "sensitive": true,
+      "required": true
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read-only mode",
+      "description": "Hide tools that create jobs or spend credits",
+      "default": false,
+      "required": false
+    }
+  },
+  "localization": { "resources": "mcpb-resources/${locale}.json", "default_locale": "en-US" }
+}

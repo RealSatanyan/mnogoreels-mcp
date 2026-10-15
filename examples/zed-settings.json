@@ -1,0 +1,8 @@
+{
+  "context_servers": {
+    "mnogoreels": {
+      "url": "https://mcp.mnogo-reels.ru/mcp",
+      "headers": { "Authorization": "Bearer mrfrt_usr_YOUR_KEY" }
+    }
+  }
+}

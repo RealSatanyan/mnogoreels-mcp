@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "type": "string",
+      "title": "MnogoReels API key",
+      "description": "Create it at https://mnogo-reels.ru/dashboard/developers?tab=keys (starts with mrfrt_usr_)",
+      "x-from": { "header": "x-api-key" }
+    },
+    "readOnly": {
+      "type": "boolean",
+      "title": "Read-only",
+      "description": "Hide tools that create jobs or spend credits",
+      "default": false,
+      "x-from": { "header": "x-mnogoreels-read-only" }
+    }
+  },
+  "required": ["apiKey"]
+}

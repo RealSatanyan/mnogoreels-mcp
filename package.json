@@ -1,0 +1,100 @@
+{
+  "name": "mnogoreels-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for MnogoReels: turn long videos into captioned vertical shorts, transcripts and articles",
+  "mcpName": "ru.mnogo-reels/mnogoreels",
+  "type": "module",
+  "bin": {
+    "mnogoreels-mcp": "dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/server/create-server.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ru.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "npm-shrinkwrap.json"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "author": "MnogoReels <support@mnogo-reels.ru> (https://mnogo-reels.ru)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RealSatanyan/mnogoreels-mcp.git"
+  },
+  "homepage": "https://github.com/RealSatanyan/mnogoreels-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/RealSatanyan/mnogoreels-mcp/issues",
+    "email": "support@mnogo-reels.ru"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "modelcontextprotocol",
+    "mnogoreels",
+    "video",
+    "shorts",
+    "reels",
+    "tiktok",
+    "clips",
+    "captions",
+    "subtitles",
+    "transcription",
+    "youtube",
+    "rutube",
+    "vk"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "mutation": "stryker run",
+    "smoke": "bash scripts/inspector-smoke.sh",
+    "version:sync": "node scripts/sync-version.mjs",
+    "version:check": "node scripts/sync-version.mjs --check",
+    "sync-version": "npm run version:sync",
+    "metadata": "node scripts/export-metadata.mjs",
+    "metadata:check": "node scripts/export-metadata.mjs --check",
+    "mcpb:pack": "bash scripts/pack-mcpb.sh",
+    "pack:mcpb": "npm run mcpb:pack",
+    "start": "node dist/cli.js",
+    "start:http": "node dist/cli.js --http"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "@stryker-mutator/core": "10.0.0",
+    "@stryker-mutator/typescript-checker": "10.0.0",
+    "@stryker-mutator/vitest-runner": "10.0.0",
+    "@types/node": "22.20.5",
+    "@vitest/coverage-v8": "4.1.11",
+    "eslint": "9.39.5",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "4.1.11"
+  }
+}

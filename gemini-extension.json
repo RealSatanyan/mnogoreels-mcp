@@ -1,0 +1,20 @@
+{
+  "name": "mnogoreels",
+  "version": "1.0.0",
+  "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+  "mcpServers": {
+    "mnogoreels": {
+      "command": "npx",
+      "args": ["-y", "mnogoreels-mcp@1.0.0"]
+    }
+  },
+  "contextFileName": "GEMINI.md",
+  "settings": [
+    {
+      "name": "MnogoReels API key",
+      "description": "Create it at https://mnogo-reels.ru/dashboard/developers?tab=keys (starts with mrfrt_usr_)",
+      "envVar": "MNOGOREELS_API_KEY",
+      "sensitive": true
+    }
+  ]
+}

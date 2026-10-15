@@ -1,0 +1,40 @@
+name: E2E (live API)
+
+on:
+  workflow_dispatch:
+    inputs:
+      spend:
+        description: 'Also run the paid flow (about 1 credit plus free GPU jobs); off = read-only, 0 credits'
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Live e2e against api.mnogo-reels.ru
+        env:
+          MNOGOREELS_E2E_API_KEY: ${{ secrets.MNOGOREELS_E2E_API_KEY }}
+          MNOGOREELS_E2E_VIDEO_URL: ${{ secrets.MNOGOREELS_E2E_VIDEO_URL }}
+          MNOGOREELS_E2E_SPEND: ${{ inputs.spend && '1' || '0' }}
+        run: |
+          [[ -n "$MNOGOREELS_E2E_API_KEY" ]] || { echo "::error::MNOGOREELS_E2E_API_KEY is not set in the release environment"; exit 1; }
+          npm run test:e2e

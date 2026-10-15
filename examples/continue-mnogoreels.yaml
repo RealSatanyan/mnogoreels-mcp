@@ -1,0 +1,10 @@
+name: MnogoReels
+version: 1.0.0
+schema: v1
+mcpServers:
+  - name: MnogoReels
+    type: streamable-http
+    url: https://mcp.mnogo-reels.ru/mcp
+    requestOptions:
+      headers:
+        Authorization: 'Bearer ${{ secrets.MNOGOREELS_API_KEY }}'

@@ -1,0 +1,308 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      bootstrap:
+        description: 'First-release bootstrap: verify and push only ghcr.io/realsatanyan/mnogoreels-mcp:0.0.0-bootstrap'
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/realsatanyan/mnogoreels-mcp
+  INSPECTOR: '@modelcontextprotocol/inspector@2.10.1'
+  MCP_PUBLISHER_VERSION: v1.8.1
+  MCP_PUBLISHER_SHA256: a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc
+  REMOTE: https://mcp.mnogo-reels.ru
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - name: Tag matches package.json version
+        id: version
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          if [[ "$GITHUB_EVENT_NAME" == push ]]; then
+            [[ "$GITHUB_REF_NAME" == "v$version" ]] || { echo "::error::tag $GITHUB_REF_NAME does not match package.json version $version"; exit 1; }
+            grep -qF "## [$version]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no '## [$version]' section"; exit 1; }
+          fi
+          prerelease=false
+          if [[ "$version" == *-* ]]; then prerelease=true; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run test:integration
+      - run: npm run version:check
+      - run: npm run metadata:check
+      - name: Install mcp-publisher (checksum verified)
+        run: |
+          curl -fsSL -o mcp-publisher_linux_amd64.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher_linux_amd64.tar.gz" | sha256sum -c
+          tar -xzf mcp-publisher_linux_amd64.tar.gz mcp-publisher
+      - run: ./mcp-publisher validate server.json
+      - name: Build the npm tarball once (with npm-shrinkwrap.json)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          npm shrinkwrap
+          mkdir -p build
+          npm pack --ignore-scripts --pack-destination build
+          tar -tzf "build/mnogoreels-mcp-$VERSION.tgz" | grep -qx package/npm-shrinkwrap.json || {
+            echo "::error::npm-shrinkwrap.json is not in the tarball; list it in package.json files"
+            exit 1
+          }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: npm-tarball
+          path: build/mnogoreels-mcp-${{ steps.version.outputs.version }}.tgz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  npm:
+    needs: verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: npm-tarball
+      - name: Publish with provenance (NPM_TOKEN for the first publish, npm trusted publishing over OIDC once the secret is deleted)
+        if: github.repository == 'RealSatanyan/mnogoreels-mcp'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TARBALL: mnogoreels-mcp-${{ needs.verify.outputs.version }}.tgz
+          DIST_TAG: ${{ needs.verify.outputs.prerelease == 'true' && 'next' || 'latest' }}
+        run: npm publish "./$TARBALL" --provenance --access public --tag "$DIST_TAG"
+
+  image:
+    needs: verify
+    if: github.event_name == 'push' || inputs.bootstrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: release
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        if: github.repository == 'RealSatanyan/mnogoreels-mcp'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' && needs.verify.outputs.prerelease == 'false' }}
+            type=raw,value=stable,enable=${{ github.event_name == 'push' && needs.verify.outputs.prerelease == 'false' }}
+            type=raw,value=0.0.0-bootstrap,enable=${{ github.event_name == 'workflow_dispatch' }}
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.repository == 'RealSatanyan/mnogoreels-mcp' }}
+          provenance: true
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        if: github.repository == 'RealSatanyan/mnogoreels-mcp'
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  mcpb:
+    needs: verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+    outputs:
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+      - name: Pack the MCPB bundle
+        id: pack
+        run: |
+          npm run mcpb:pack
+          echo "sha256=$(cut -d' ' -f1 "build/mnogoreels-mcp-$VERSION.mcpb.sha256")" >> "$GITHUB_OUTPUT"
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v heading="## [$VERSION]" 'index($0, heading) == 1 { found = 1; next } found && /^## \[/ { exit } found' CHANGELOG.md > build/release-notes.md
+          [[ -s build/release-notes.md ]] || { echo "::error::empty CHANGELOG.md section for $VERSION"; exit 1; }
+      - name: GitHub release with the MCPB assets
+        if: github.repository == 'RealSatanyan/mnogoreels-mcp'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PRERELEASE: ${{ needs.verify.outputs.prerelease }}
+        run: |
+          assets=("build/mnogoreels-mcp-$VERSION.mcpb" build/mnogoreels-mcp.mcpb build/*.sha256)
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release upload "v$VERSION" "${assets[@]}" --clobber
+          else
+            gh release create "v$VERSION" --title "v$VERSION" --notes-file build/release-notes.md --verify-tag \
+              --prerelease="$PRERELEASE" "${assets[@]}"
+          fi
+
+  deploy-remote:
+    needs: [verify, image]
+    if: github.event_name == 'push' && github.repository == 'RealSatanyan/mnogoreels-mcp' && needs.verify.outputs.prerelease == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+      COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+      COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+      HEALTHZ_URL: ${{ vars.MNOGOREELS_REMOTE_HEALTHZ_URL || 'https://mcp.mnogo-reels.ru/healthz' }}
+    steps:
+      - name: Redeploy :stable on Coolify (deploy-only token)
+        if: env.COOLIFY_DEPLOY_WEBHOOK != ''
+        run: |
+          curl -fsS -H "Authorization: Bearer $COOLIFY_API_TOKEN" "$COOLIFY_DEPLOY_WEBHOOK&force=true"
+      - name: Wait until the remote server reports the new version
+        if: env.COOLIFY_DEPLOY_WEBHOOK != ''
+        run: |
+          for _ in $(seq 60); do
+            if curl -fsS -m 10 "$HEALTHZ_URL" | jq -e --arg v "$VERSION" '.version == $v' >/dev/null; then
+              echo "$HEALTHZ_URL reports $VERSION"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$HEALTHZ_URL did not report $VERSION within 10 minutes"
+          exit 1
+
+  registry:
+    needs: [verify, npm, image, mcpb, deploy-remote]
+    if: ${{ !failure() && !cancelled() && github.event_name == 'push' && github.repository == 'RealSatanyan/mnogoreels-mcp' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+      - name: Install mcp-publisher (checksum verified)
+        run: |
+          curl -fsSL -o mcp-publisher_linux_amd64.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher_linux_amd64.tar.gz" | sha256sum -c
+          tar -xzf mcp-publisher_linux_amd64.tar.gz mcp-publisher
+      - name: GHCR image is publicly pullable
+        run: |
+          curl -fsS -o /dev/null 'https://ghcr.io/token?scope=repository:realsatanyan/mnogoreels-mcp:pull' || {
+            echo "::error::make the GHCR package public first (github.com/users/RealSatanyan/packages/container/mnogoreels-mcp/settings)"
+            exit 1
+          }
+      - name: Remote preflight (publish without remotes when it fails)
+        run: |
+          if curl -fsS -m 10 "$REMOTE/healthz" | jq -e --arg v "$VERSION" '.version == $v' >/dev/null &&
+            npx --yes "$INSPECTOR" --cli --transport http --server-url "$REMOTE/mcp" --connect-timeout 15000 --stored-auth-only --method tools/list --format json |
+            jq -e '.result.tools | length == 19' >/dev/null; then
+            echo "$REMOTE serves $VERSION with 19 tools"
+          else
+            echo "::warning::$REMOTE is not serving $VERSION with 19 tools; publishing without remotes (remote listings wait for the next release)"
+            jq 'del(.remotes)' server.json > server.next.json
+            mv server.next.json server.json
+          fi
+      - name: Set the MCPB digest
+        env:
+          MCPB_SHA256: ${{ needs.mcpb.outputs.sha256 }}
+        run: |
+          jq --arg sha "$MCPB_SHA256" '(.packages[] | select(.registryType == "mcpb") | .fileSha256) = $sha' server.json > server.next.json
+          mv server.next.json server.json
+          jq -e --arg sha "$MCPB_SHA256" '[.packages[] | select(.registryType == "mcpb") | .fileSha256] == [$sha]' server.json
+      - run: ./mcp-publisher validate server.json
+      - name: Log in to the MCP Registry (HTTP domain auth)
+        env:
+          MCP_REGISTRY_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
+        run: ./mcp-publisher login http --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"
+      - run: ./mcp-publisher publish server.json
+      - name: Registry lists the new version
+        run: |
+          for _ in $(seq 10); do
+            if curl -fsS -m 20 "https://registry.modelcontextprotocol.io/v0.1/servers/ru.mnogo-reels%2Fmnogoreels/versions/$VERSION" |
+              jq -e --arg v "$VERSION" '.server.version == $v' >/dev/null; then
+              echo "registry lists ru.mnogo-reels/mnogoreels $VERSION"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::registry does not list ru.mnogo-reels/mnogoreels $VERSION"
+          exit 1

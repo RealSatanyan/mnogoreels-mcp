@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mnogoreels": {
+      "url": "https://mcp.mnogo-reels.ru/mcp",
+      "headers": { "Authorization": "Bearer ${env:MNOGOREELS_API_KEY}" }
+    }
+  }
+}

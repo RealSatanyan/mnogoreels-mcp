@@ -1,0 +1,183 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  INSPECTOR: '@modelcontextprotocol/inspector@2.10.1'
+  MCPB: '@anthropic-ai/mcpb@2.1.2'
+  MCP_PUBLISHER_VERSION: v1.8.1
+  MCP_PUBLISHER_SHA256: a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc
+
+jobs:
+  checks:
+    name: checks (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.x', '24.x']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npm run test:integration
+      - run: npm run version:check
+      - run: npm run metadata:check
+      - run: npm audit --omit=dev --audit-level=high
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Inspector CLI smoke (stdio and local HTTP)
+        run: npm run smoke
+      - name: Production User-Agent passes the API edge
+        run: |
+          UA="mnogoreels-mcp/$(node -p 'require("./package.json").version') (+https://github.com/RealSatanyan/mnogoreels-mcp)"
+          assert_json() {
+            local label=$1 result=$2
+            echo "$label -> $result"
+            [[ "${result%% *}" != 403 && "$result" == *application/json* ]] || { echo "::error::$label answered '$result' to UA '$UA'"; return 1; }
+          }
+          assert_json live "$(curl -sS -A "$UA" -o /dev/null -w '%{http_code} %{content_type}' https://api.mnogo-reels.ru/live)"
+          assert_json probe "$(curl -sS -A "$UA" -H 'Content-Type: application/json' -d '{"url":"https://example.com/video.mp4"}' -o /dev/null -w '%{http_code} %{content_type}' https://api.mnogo-reels.ru/downloads/probe)"
+
+  manifests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+      - name: Validate MCPB manifest
+        run: npx --yes "$MCPB" validate mcpb/manifest.json
+      - name: Install mcp-publisher (checksum verified)
+        run: |
+          curl -fsSL -o mcp-publisher_linux_amd64.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher_linux_amd64.tar.gz" | sha256sum -c
+          tar -xzf mcp-publisher_linux_amd64.tar.gz mcp-publisher
+      - name: Validate server.json
+        run: ./mcp-publisher validate server.json
+      - name: Check directory manifests
+        run: |
+          jq -e '.name == "mnogoreels" and .contextFileName == "GEMINI.md" and (.mcpServers.mnogoreels.command == "npx")' gemini-extension.json
+          jq -e '.maintainers == ["RealSatanyan"]' glama.json
+          jq -e '.type == "object" and .required == ["apiKey"]' smithery/config-schema.json
+          size=$(wc -c < smithery/config-schema.json)
+          [[ $size -le 1024 ]] || { echo "::error::smithery/config-schema.json is $size bytes (limit 1024)"; exit 1; }
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      IMAGE: mnogoreels-mcp:ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ env.IMAGE }}
+      - name: Runtime image has curl and no npm
+        run: docker run --rm --entrypoint sh "$IMAGE" -c 'command -v curl && ! command -v npm'
+      - name: HTTP mode on a read-only root filesystem
+        run: |
+          docker run -d --name mcp-http --read-only --tmpfs /tmp -e MNOGOREELS_TRANSPORT=http -p 8080:8080 "$IMAGE"
+          curl -fsS --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:8080/healthz
+          npx --yes "$INSPECTOR" --cli --transport http --server-url http://127.0.0.1:8080/mcp --connect-timeout 10000 --stored-auth-only --method tools/list --format json | jq -e '.result.tools | length == 19'
+      - name: Container logs
+        if: ${{ !cancelled() }}
+        run: docker logs mcp-http || true
+      - name: stdio mode lists tools
+        run: npx --yes "$INSPECTOR" --cli docker run -i --rm "$IMAGE" -- --method tools/list --format json | jq -e '.result.tools | length == 19'
+
+  mutation:
+    if: >-
+      github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'mutation')
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    concurrency:
+      group: mutation-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ github.run_id }}
+          restore-keys: stryker-incremental-
+      - name: Mutation testing (break threshold 75)
+        run: npm run mutation -- --concurrency 2
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: ${{ !cancelled() && hashFiles('reports/stryker-incremental.json') != '' }}
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ github.run_id }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          if-no-files-found: warn

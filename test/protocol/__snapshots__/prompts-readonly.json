@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      {
+        "description": "How many recent jobs to review, default 5",
+        "name": "count",
+        "required": false
+      }
+    ],
+    "description": "Review recent clip jobs, pick the best clips and suggest recut settings.",
+    "name": "review_recent_clips",
+    "title": "Review my recent clips"
+  }
+]

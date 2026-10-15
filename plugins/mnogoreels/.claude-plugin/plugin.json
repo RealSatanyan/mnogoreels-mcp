@@ -1,0 +1,29 @@
+{
+  "name": "mnogoreels",
+  "displayName": "MnogoReels",
+  "version": "1.0.0",
+  "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+  "author": {
+    "name": "MnogoReels",
+    "email": "support@mnogo-reels.ru",
+    "url": "https://mnogo-reels.ru"
+  },
+  "homepage": "https://github.com/RealSatanyan/mnogoreels-mcp",
+  "repository": "https://github.com/RealSatanyan/mnogoreels-mcp",
+  "license": "MIT",
+  "keywords": ["video", "shorts", "reels", "clips", "captions", "transcription", "youtube", "rutube"],
+  "icon": "./logo.png",
+  "documentationUrl": "https://github.com/RealSatanyan/mnogoreels-mcp#readme",
+  "supportUrl": "https://github.com/RealSatanyan/mnogoreels-mcp/issues",
+  "privacyPolicyUrl": "https://mnogo-reels.ru/privacy-policy",
+  "termsOfServiceUrl": "https://mnogo-reels.ru/terms",
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "MnogoReels API key",
+      "description": "Create it at https://mnogo-reels.ru/dashboard/developers?tab=keys (starts with mrfrt_usr_)",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

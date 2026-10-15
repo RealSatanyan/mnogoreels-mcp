@@ -1,0 +1,134 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ru.mnogo-reels/mnogoreels",
+  "title": "MnogoReels",
+  "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+  "version": "1.0.0",
+  "websiteUrl": "https://github.com/RealSatanyan/mnogoreels-mcp#readme",
+  "repository": {
+    "url": "https://github.com/RealSatanyan/mnogoreels-mcp",
+    "source": "github",
+    "id": "1419613794"
+  },
+  "icons": [
+    { "src": "https://mnogo-reels.ru/logo-512.png", "mimeType": "image/png", "sizes": ["512x512"] },
+    {
+      "src": "https://raw.githubusercontent.com/RealSatanyan/mnogoreels-mcp/main/assets/icon-192.png",
+      "mimeType": "image/png",
+      "sizes": ["192x192"]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "mnogoreels-mcp",
+      "version": "1.0.0",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "MNOGOREELS_API_KEY",
+          "description": "Personal API key from https://mnogo-reels.ru/dashboard/developers?tab=keys (starts with mrfrt_usr_)",
+          "placeholder": "mrfrt_usr_...",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "MNOGOREELS_PROFILE",
+          "description": "default, readonly (no job creation) or directory",
+          "default": "default",
+          "choices": ["default", "readonly", "directory"],
+          "isRequired": false
+        },
+        {
+          "name": "MNOGOREELS_READ_ONLY",
+          "description": "true hides every tool that creates jobs or spends credits",
+          "format": "boolean",
+          "default": "false",
+          "isRequired": false
+        },
+        {
+          "name": "MNOGOREELS_MAX_CREDITS_PER_CALL",
+          "description": "Optional hard cap on credits per paid call",
+          "format": "number",
+          "isRequired": false
+        },
+        {
+          "name": "MNOGOREELS_TOOLSETS",
+          "description": "Comma-separated toolsets: clips, transcripts, articles, library, thumbnails (default all)",
+          "isRequired": false
+        },
+        {
+          "name": "MNOGOREELS_API_URL",
+          "description": "API base URL; leave the default",
+          "default": "https://api.mnogo-reels.ru",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/realsatanyan/mnogoreels-mcp:1.0.0",
+      "runtimeHint": "docker",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "MNOGOREELS_API_KEY",
+          "description": "Personal API key (mrfrt_usr_...)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/RealSatanyan/mnogoreels-mcp/releases/download/v1.0.0/mnogoreels-mcp-1.0.0.mcpb",
+      "version": "1.0.0",
+      "fileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "transport": { "type": "stdio" }
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.mnogo-reels.ru/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "MnogoReels API key as a Bearer token",
+          "value": "Bearer {api_key}",
+          "isRequired": true,
+          "isSecret": true,
+          "variables": {
+            "api_key": {
+              "description": "Personal API key from https://mnogo-reels.ru/dashboard/developers?tab=keys (mrfrt_usr_...)",
+              "isRequired": true,
+              "isSecret": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.mnogo-reels.ru/mcp/readonly",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "MnogoReels API key as a Bearer token (read-only endpoint: no job creation, no spending)",
+          "value": "Bearer {api_key}",
+          "isRequired": true,
+          "isSecret": true,
+          "variables": {
+            "api_key": {
+              "description": "Personal API key (mrfrt_usr_...)",
+              "isRequired": true,
+              "isSecret": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

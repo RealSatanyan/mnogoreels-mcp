@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+reports/
+.stryker-tmp*/
+package-lock.json
+npm-shrinkwrap.json
+plans/
+test/protocol/__snapshots__/
+*.md

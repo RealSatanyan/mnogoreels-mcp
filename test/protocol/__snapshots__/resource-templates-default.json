@@ -1,0 +1,23 @@
+[
+  {
+    "description": "Status and clips of one clip job.",
+    "mimeType": "application/json",
+    "name": "clip-job",
+    "title": "Clip job",
+    "uriTemplate": "mnogoreels://clip-jobs/{job_id}"
+  },
+  {
+    "description": "First page of a transcription as plain text.",
+    "mimeType": "text/plain",
+    "name": "transcription",
+    "title": "Transcription",
+    "uriTemplate": "mnogoreels://transcriptions/{transcription_id}"
+  },
+  {
+    "description": "First page of an article as Markdown.",
+    "mimeType": "text/markdown",
+    "name": "article",
+    "title": "Article",
+    "uriTemplate": "mnogoreels://articles/{article_id}"
+  }
+]

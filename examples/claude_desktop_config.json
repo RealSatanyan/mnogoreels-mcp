@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mnogoreels": {
+      "command": "npx",
+      "args": ["-y", "mnogoreels-mcp@latest"],
+      "env": { "MNOGOREELS_API_KEY": "mrfrt_usr_YOUR_KEY" }
+    }
+  }
+}

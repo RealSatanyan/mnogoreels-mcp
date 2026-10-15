@@ -1,0 +1,14 @@
+{
+  "name": "mnogoreels",
+  "version": "1.0.0",
+  "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
+  "author": {
+    "name": "MnogoReels",
+    "email": "support@mnogo-reels.ru"
+  },
+  "homepage": "https://github.com/RealSatanyan/mnogoreels-mcp",
+  "repository": "https://github.com/RealSatanyan/mnogoreels-mcp",
+  "license": "MIT",
+  "keywords": ["video", "shorts", "reels", "clips", "captions", "transcription", "youtube", "rutube"],
+  "logo": "logo.png"
+}

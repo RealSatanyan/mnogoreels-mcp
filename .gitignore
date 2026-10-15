@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+coverage/
+reports/
+.stryker-tmp*/
+*.log
+*.tgz
+*.mcpb
+.env
+.env.*

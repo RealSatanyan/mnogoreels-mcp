@@ -1,0 +1,13 @@
+extensions:
+  mnogoreels:
+    enabled: true
+    name: mnogoreels
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - mnogoreels-mcp@latest
+    envs:
+      MNOGOREELS_API_KEY: mrfrt_usr_YOUR_KEY
+    timeout: 120
+    description: Turn long videos into captioned vertical clips, transcripts and articles
