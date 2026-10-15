@@ -111,7 +111,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           TARBALL: mnogoreels-mcp-${{ needs.verify.outputs.version }}.tgz
           DIST_TAG: ${{ needs.verify.outputs.prerelease == 'true' && 'next' || 'latest' }}
-        run: npm publish "./$TARBALL" --provenance --access public --tag "$DIST_TAG"
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if npm view "mnogoreels-mcp@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::mnogoreels-mcp@$VERSION is already on npm; skipping the publish"
+            exit 0
+          fi
+          npm publish "./$TARBALL" --provenance --access public --tag "$DIST_TAG"
 
   image:
     needs: verify
@@ -289,10 +295,10 @@ jobs:
           mv server.next.json server.json
           jq -e --arg sha "$MCPB_SHA256" '[.packages[] | select(.registryType == "mcpb") | .fileSha256] == [$sha]' server.json
       - run: ./mcp-publisher validate server.json
-      - name: Log in to the MCP Registry (HTTP domain auth)
+      - name: Log in to the MCP Registry (DNS domain auth)
         env:
           MCP_REGISTRY_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
-        run: ./mcp-publisher login http --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"
+        run: ./mcp-publisher login dns --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"
       - run: ./mcp-publisher publish server.json
       - name: Registry lists the new version
         run: |

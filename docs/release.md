@@ -44,7 +44,7 @@ Settings → Environments → **New environment** `release`:
 | Secret | Purpose |
 | --- | --- |
 | `NPM_TOKEN` | First npm publish only. Afterwards switch to npm trusted publishing (OIDC) and delete it. |
-| `MCP_REGISTRY_PRIVATE_KEY` | Ed25519 private key (hex) for `mcp-publisher login http --domain mnogo-reels.ru`. |
+| `MCP_REGISTRY_PRIVATE_KEY` | Ed25519 private key (hex) for `mcp-publisher login dns --domain mnogo-reels.ru`. |
 | `COOLIFY_DEPLOY_WEBHOOK` | Optional: Coolify deploy webhook URL of the hosted server. |
 | `COOLIFY_API_TOKEN` | Coolify API token with the **deploy** ability only. |
 | `MNOGOREELS_E2E_API_KEY` | Only for the manual `e2e.yml` workflow (the dedicated `mcp-smoke` key). |
@@ -56,14 +56,14 @@ Never use `pull_request_target` and never run release jobs on self-hosted runner
 The first version is published with a token, because npm trusted publishing can only be configured for a package that already exists. Every later version is published over OIDC without any stored secret.
 
 1. Create or use the npm account that will own `mnogoreels-mcp`; enable 2FA.
-2. First publish: create a granular access token with read and write access (the package does not exist yet, so it has to cover all packages of the account), short expiry, and store it as the `NPM_TOKEN` secret of the `release` environment. The `npm` job passes it as `NODE_AUTH_TOKEN` and publishes the tarball built in `verify` with `--provenance`.
+2. First publish: either publish the `verify` tarball by hand with an OTP (`npm publish mnogoreels-mcp-X.Y.Z.tgz --access public --provenance=false --otp=…`; the `npm` job then skips the version it finds on npm), or create a granular access token with read and write access (the package does not exist yet, so it has to cover all packages of the account), short expiry, and store it as the `NPM_TOKEN` secret of the `release` environment. The `npm` job passes it as `NODE_AUTH_TOKEN` and publishes the tarball built in `verify` with `--provenance`.
 3. Right after 1.0.0 is on npm, switch to trusted publishing: npmjs.com → `mnogoreels-mcp` → Settings → **Trusted publisher** → GitHub Actions with organization or user `RealSatanyan`, repository `mnogoreels-mcp`, workflow filename `release.yml` and environment `release`. Optionally set "Publishing access" to require 2FA and disallow tokens.
 4. Delete the `NPM_TOKEN` secret and revoke the token on npmjs.com. The workflow needs no change: `NODE_AUTH_TOKEN` then expands to an empty value, and npm (11.5.1 or newer, shipped with Node 24 in the job) exchanges the job's OIDC token (`id-token: write`) for a short-lived publish token. Provenance keeps working.
 5. Check the next release: the npm page of the new version shows "Published via GitHub Actions" with a provenance link to `release.yml`.
 
-### Official MCP Registry key (HTTP authentication)
+### Official MCP Registry key (DNS authentication)
 
-The namespace `ru.mnogo-reels/*` is proven by a file on `https://mnogo-reels.ru`. Generate the key pair on a trusted machine with OpenSSL 3:
+The namespace `ru.mnogo-reels/*` is proven by a TXT record on `mnogo-reels.ru` (in place since 2026-10-15). Generate the key pair on a trusted machine with OpenSSL 3:
 
 ```bash
 openssl genpkey -algorithm Ed25519 -out mcp-registry-key.pem
@@ -73,7 +73,7 @@ openssl pkey -in mcp-registry-key.pem -noout -text | grep -A3 "priv:" | tail -n 
 ```
 
 - Paste the printed hex private key into the `MCP_REGISTRY_PRIVATE_KEY` secret, then delete `mcp-registry-key.pem` (keep an offline backup only if your policy requires one).
-- Hand `mcp-registry-auth` (public data only) to the website: it must be served at `https://mnogo-reels.ru/.well-known/mcp-registry-auth` from `client/public/.well-known/mcp-registry-auth` in the website repository, ideally with `Content-Type: text/plain`. Verify after the website deploy: `curl -s https://mnogo-reels.ru/.well-known/mcp-registry-auth` prints the `v=MCPv1; k=ed25519; p=…` line.
+- Publish the content of `mcp-registry-auth` (public data only) as a TXT record on the apex `mnogo-reels.ru` in Cloudflare. Verify: `dig +short TXT mnogo-reels.ru` prints the `v=MCPv1; k=ed25519; p=…` line. A file at `https://mnogo-reels.ru/.well-known/mcp-registry-auth` with `login http` works too, but needs a website deploy.
 
 ### `mcp-publisher`
 
@@ -134,5 +134,5 @@ The OCI package entry of `server.json` is verified by the registry through the i
 | --- | --- |
 | Hosted server | `docker buildx imagetools create -t ghcr.io/realsatanyan/mnogoreels-mcp:stable ghcr.io/realsatanyan/mnogoreels-mcp:<previous X.Y.Z>`, then trigger the Coolify deploy webhook and run the checks in [deploy-coolify.md](deploy-coolify.md) step 8. |
 | npm | `npm deprecate mnogoreels-mcp@X.Y.Z "Broken release, use X.Y.W"` and publish a fixed patch release. Never unpublish. |
-| Official MCP Registry | `./mcp-publisher login http --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"` then `./mcp-publisher status --status deprecated --message "Use X.Y.W" ru.mnogo-reels/mnogoreels X.Y.Z`. Registry versions are immutable; publish a fixed version. |
+| Official MCP Registry | `./mcp-publisher login dns --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"` then `./mcp-publisher status --status deprecated --message "Use X.Y.W" ru.mnogo-reels/mnogoreels X.Y.Z`. Registry versions are immutable; publish a fixed version. |
 | GitHub Release / `.mcpb` | Mark the release as a pre-release or delete its assets; re-run the `mcpb` job of the previous tag to restore the unversioned `mnogoreels-mcp.mcpb` if needed. |

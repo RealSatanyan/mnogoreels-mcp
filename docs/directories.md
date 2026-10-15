@@ -48,7 +48,7 @@ Automatic: the `npm` job of `release.yml` publishes `mnogoreels-mcp` with proven
 
 ## 2. Official MCP Registry
 
-Automatic: the `registry` job of `release.yml` runs `mcp-publisher publish` with `server.json`. Prerequisite: `https://mnogo-reels.ru/.well-known/mcp-registry-auth` is live (frontend follow-up B1, see [release.md](release.md)). Check: `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=ru.mnogo-reels/mnogoreels"`.
+Automatic: the `registry` job of `release.yml` runs `mcp-publisher publish` with `server.json`. Prerequisite: the `v=MCPv1` TXT record on `mnogo-reels.ru` (see [release.md](release.md)). Check: `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=ru.mnogo-reels/mnogoreels"`.
 
 Downstream directories that read the registry automatically: PulseMCP, Glama connectors, vibecoding.ru/mcp.
 

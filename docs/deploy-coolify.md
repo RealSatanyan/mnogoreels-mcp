@@ -2,15 +2,9 @@
 
 This is how `https://mcp.mnogo-reels.ru/mcp` runs. The Coolify host also runs the production MongoDB and the Next.js website, has limited free memory and a nearly full disk, and has had outages from resource exhaustion before. The container is therefore pulled as a prebuilt image (never built on the host), resource-limited and hardened.
 
-## 1. Interim host (before DNS exists)
+## 1. Interim host
 
-Only the owner can create the `mcp.mnogo-reels.ru` DNS record. Until it exists, deploy on the Coolify sslip name, where Let's Encrypt HTTP-01 works:
-
-- domain: `https://mcp.185.93.105.71.sslip.io`
-- `MNOGOREELS_ALLOWED_HOSTS=mcp.185.93.105.71.sslip.io,localhost,127.0.0.1`
-- `MNOGOREELS_PUBLIC_URL=https://mcp.185.93.105.71.sslip.io/mcp`
-
-Run every check of step 8 against it. **Do not publish any remote-based listing** (registry `remotes`, Smithery URL publish, awesome-remote-mcp-servers, the Docker remote entry, plugin `.mcp.json`) until step 2 is done and step 8 passes on the real name.
+The `mcp.mnogo-reels.ru` record exists since 2026-10-15. Before that the server ran on the Coolify sslip name `https://mcp.185.93.105.71.sslip.io` (Let's Encrypt HTTP-01 works there), which is the place to stage a second instance.
 
 ## 2. DNS
 
@@ -71,8 +65,10 @@ Coolify → Resource limits: memory `512m`, CPU `1`.
 Coolify → Custom Docker Options:
 
 ```text
---pids-limit 256 --read-only --tmpfs /tmp:size=16m --cap-drop=ALL --security-opt=no-new-privileges --stop-timeout 60
+--pids-limit 256 --read-only --tmpfs /tmp:size=16m --cap-drop=ALL --stop-timeout 60
 ```
+
+Do not add `--security-opt=no-new-privileges`: Coolify parses it as the security option `no` and the container never starts. The image already runs as a non-root user without capabilities.
 
 The stop timeout of 60 seconds lets in-flight paid requests finish during a redeploy (the server waits up to 35 seconds for them, then up to 10 seconds for other requests).
 
