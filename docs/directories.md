@@ -126,7 +126,7 @@ Line:
 ```markdown
 - [MnogoReels](https://mnogo-reels.ru) `https://mcp.mnogo-reels.ru/mcp`
   [![MnogoReels MCP connector](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels/badges/score.svg)](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels)
-  🔑 - Turn long videos into captioned vertical shorts, transcripts and articles with your own API key.
+  🔓 - Turn long videos into captioned vertical shorts, transcripts and articles with your own API key.
 ```
 
 ## 7. Smithery
