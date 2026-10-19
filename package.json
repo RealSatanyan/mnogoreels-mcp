@@ -1,6 +1,6 @@
 {
   "name": "mnogoreels-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for MnogoReels: turn long videos into captioned vertical shorts, transcripts and articles",
   "mcpName": "ru.mnogo-reels/mnogoreels",
   "type": "module",

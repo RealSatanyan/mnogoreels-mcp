@@ -3,7 +3,7 @@
   "name": "ru.mnogo-reels/mnogoreels",
   "title": "MnogoReels",
   "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "websiteUrl": "https://github.com/RealSatanyan/mnogoreels-mcp#readme",
   "repository": {
     "url": "https://github.com/RealSatanyan/mnogoreels-mcp",
@@ -23,7 +23,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "mnogoreels-mcp",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "runtimeHint": "npx",
       "transport": { "type": "stdio" },
       "environmentVariables": [
@@ -69,7 +69,7 @@
     },
     {
       "registryType": "oci",
-      "identifier": "ghcr.io/realsatanyan/mnogoreels-mcp:1.0.0",
+      "identifier": "ghcr.io/realsatanyan/mnogoreels-mcp:1.0.1",
       "runtimeHint": "docker",
       "transport": { "type": "stdio" },
       "environmentVariables": [
@@ -83,8 +83,8 @@
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/RealSatanyan/mnogoreels-mcp/releases/download/v1.0.0/mnogoreels-mcp-1.0.0.mcpb",
-      "version": "1.0.0",
+      "identifier": "https://github.com/RealSatanyan/mnogoreels-mcp/releases/download/v1.0.1/mnogoreels-mcp-1.0.1.mcpb",
+      "version": "1.0.1",
       "fileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "transport": { "type": "stdio" }
     }

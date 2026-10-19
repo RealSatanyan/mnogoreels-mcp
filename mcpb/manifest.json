@@ -3,7 +3,7 @@
   "manifest_version": "0.3",
   "name": "mnogoreels",
   "display_name": "MnogoReels",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
   "long_description": "Clip YouTube, VK Video, RuTube, Dzen, Twitch, Yandex Disk and Google Drive videos into vertical Shorts/Reels with captions and hooks, get transcripts, articles and B-roll, and follow job progress. Requires a MnogoReels account and an API key from https://mnogo-reels.ru/dashboard/developers?tab=keys. Paid tools always quote the price and need your confirmation.",
   "author": { "name": "MnogoReels", "email": "support@mnogo-reels.ru", "url": "https://mnogo-reels.ru" },
