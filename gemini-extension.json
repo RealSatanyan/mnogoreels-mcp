@@ -1,11 +1,11 @@
 {
   "name": "mnogoreels",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
   "mcpServers": {
     "mnogoreels": {
       "command": "npx",
-      "args": ["-y", "mnogoreels-mcp@1.0.0"]
+      "args": ["-y", "mnogoreels-mcp@1.0.1"]
     }
   },
   "contextFileName": "GEMINI.md",

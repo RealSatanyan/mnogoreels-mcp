@@ -12,7 +12,7 @@
       "name": "mnogoreels",
       "source": "./plugins/mnogoreels",
       "description": "Turn long videos into captioned vertical shorts, transcripts and articles with MnogoReels.",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }

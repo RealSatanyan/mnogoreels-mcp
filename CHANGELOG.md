@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-19
+
 ### Fixed
 
 - `quote_clip_job`: a call with neither `source_url` nor `job_id` (for example `url` instead of `source_url`) now gets "Give exactly one of source_url (new video) or job_id (recut)." instead of a message that said "not both".
@@ -29,5 +31,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Remote endpoint `https://mcp.mnogo-reels.ru/mcp` (plus `/mcp/readonly` and `/mcp/directory`), server card at `/.well-known/mcp/server-card.json`.
 - Packaging: npm package, multi-arch image `ghcr.io/realsatanyan/mnogoreels-mcp`, Claude Desktop bundle (`.mcpb`), Claude Code plugin and marketplace, Cursor plugin, Gemini CLI extension, Official MCP Registry entry `ru.mnogo-reels/mnogoreels`.
 
-[Unreleased]: https://github.com/RealSatanyan/mnogoreels-mcp/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/RealSatanyan/mnogoreels-mcp/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/RealSatanyan/mnogoreels-mcp/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/RealSatanyan/mnogoreels-mcp/releases/tag/v1.0.0
