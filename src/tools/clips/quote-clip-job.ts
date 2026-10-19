@@ -45,7 +45,7 @@ const QuoteClipJobOutput = z.object({
     ),
 });
 
-const ONE_SOURCE = 'Give either source_url (new video) or job_id (recut), not both.';
+const ONE_SOURCE = 'Give exactly one of source_url (new video) or job_id (recut).';
 
 const sourceOf = async (
   args: { readonly source_url?: string | undefined; readonly job_id?: string | undefined },

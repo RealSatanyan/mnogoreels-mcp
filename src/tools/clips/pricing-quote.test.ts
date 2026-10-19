@@ -133,7 +133,7 @@ describe('quote_clip_job for a new video', () => {
     const { result, harness } = await quote(args);
     expect(
       textOf(result).startsWith(
-        'Error [invalid_arguments]: Give either source_url (new video) or job_id (recut), not both.',
+        'Error [invalid_arguments]: Give exactly one of source_url (new video) or job_id (recut).',
       ),
     ).toBe(true);
     expect(harness.api.requests()).toHaveLength(0);

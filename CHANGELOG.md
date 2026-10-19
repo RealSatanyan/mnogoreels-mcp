@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `quote_clip_job`: a call with neither `source_url` nor `job_id` (for example `url` instead of `source_url`) now gets "Give exactly one of source_url (new video) or job_id (recut)." instead of a message that said "not both".
+
 ## [1.0.0] - 2026-10-15
 
 ### Added
