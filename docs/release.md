@@ -134,5 +134,6 @@ The OCI package entry of `server.json` is verified by the registry through the i
 | --- | --- |
 | Hosted server | `docker buildx imagetools create -t ghcr.io/realsatanyan/mnogoreels-mcp:stable ghcr.io/realsatanyan/mnogoreels-mcp:<previous X.Y.Z>`, then trigger the Coolify deploy webhook and run the checks in [deploy-coolify.md](deploy-coolify.md) step 8. |
 | npm | `npm deprecate mnogoreels-mcp@X.Y.Z "Broken release, use X.Y.W"` and publish a fixed patch release. Never unpublish. |
+| npm job failed on a tag | Actions → `release.yml` → **Run workflow** on `main` with `npm_only: true` (main must still carry that version). The publish runs with `--loglevel verbose`, so an OIDC refusal shows up as an `oidc` line. Then publish the registry entry by hand as in the row below, with `publish` instead of `status`. |
 | Official MCP Registry | `./mcp-publisher login dns --domain mnogo-reels.ru --private-key "$MCP_REGISTRY_PRIVATE_KEY"` then `./mcp-publisher status --status deprecated --message "Use X.Y.W" ru.mnogo-reels/mnogoreels X.Y.Z`. Registry versions are immutable; publish a fixed version. |
 | GitHub Release / `.mcpb` | Mark the release as a pre-release or delete its assets; re-run the `mcpb` job of the previous tag to restore the unversioned `mnogoreels-mcp.mcpb` if needed. |
