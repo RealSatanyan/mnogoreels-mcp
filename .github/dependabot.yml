@@ -6,6 +6,13 @@ updates:
       interval: weekly
     cooldown:
       default-days: 7
+    groups:
+      vitest:
+        patterns: ['vitest', '@vitest/*']
+      eslint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint']
+      stryker:
+        patterns: ['@stryker-mutator/*']
     ignore:
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
