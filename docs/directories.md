@@ -2,16 +2,16 @@
 
 Where the MnogoReels MCP server is listed, in submission order after the first release, with the exact texts to paste. Keep this file in sync when a listing changes.
 
-## Status (2026-10-15)
+## Status (2026-10-19)
 
 | # | Directory | State |
 | --- | --- | --- |
 | 1 | npm | Live: `mnogoreels-mcp@1.0.0` |
 | 2 | Official MCP Registry | Live: `ru.mnogo-reels/mnogoreels` 1.0.0 |
 | 3 | GitHub MCP Registry / VS Code | Email sent to partnerships@github.com (cc support@) |
-| 4 | Glama | Indexed; claim the server and the connector (needs GitHub login) |
+| 4 | Glama | Server indexed (quality A, license A, maintenance B); connector page live; claiming both needs GitHub login |
 | 5 | awesome-mcp-servers | [PR #16540](https://github.com/punkpeye/awesome-mcp-servers/pull/16540) |
-| 6 | awesome-remote-mcp-servers | Waits for the Glama connector page |
+| 6 | awesome-remote-mcp-servers | [PR #2265](https://github.com/punkpeye/awesome-remote-mcp-servers/pull/2265) |
 | 7 | Smithery | Needs `smithery auth login` (browser) |
 | 8 | Gemini CLI gallery | Automatic (topic + `gemini-extension.json`) |
 | 9 | Docker MCP Catalog | [PR #5735](https://github.com/docker/mcp-registry/pull/5735); reviewer key on request |
@@ -20,9 +20,9 @@ Where the MnogoReels MCP server is listed, in submission order after the first r
 | 12 | mcpservers.org / MCP Market | Submitted (free queues); LobeHub and PulseMCP automatic |
 | 13 | Claude plugin directory | Unblocked: privacy section shipped; submit at claude.ai/directory/manage (login) |
 | 14 | Cursor Marketplace / cursor.directory | Needs login |
-| 15 | Goose | [PR #12924](https://github.com/aaif-goose/goose/pull/12924) |
+| 15 | Goose | Directory retired in favour of the official MCP Registry (PR #12924 closed); covered by item 2 |
 | 16 | mcpdb.ru | Their form returns HTTP 500; retry later |
-| 16 | neuraldeep.ru | Needs Yandex login |
+| 17 | neuraldeep.ru | Needs Yandex login |
 
 ## Before you start
 
@@ -119,12 +119,14 @@ Line:
 
 Prerequisite: the Glama connector of item 4 exists. Pull request to `punkpeye/awesome-remote-mcp-servers`.
 
-Pull request title: `Add MnogoReels remote MCP server`
+Pull request title: `Add MnogoReels remote MCP server 🤖🤖🤖` when opened by an agent; the account opening it must star the repository. Three-line entry under **Multimedia**:
 
 Line:
 
 ```markdown
-- [MnogoReels](https://mnogo-reels.ru) `https://mcp.mnogo-reels.ru/mcp` [![MnogoReels MCP connector](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels/badges/score.svg)](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels) 🔓 - Turn long videos into captioned vertical shorts, transcripts and articles; tool calls need an API key.
+- [MnogoReels](https://mnogo-reels.ru) `https://mcp.mnogo-reels.ru/mcp`
+  [![MnogoReels MCP connector](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels/badges/score.svg)](https://glama.ai/mcp/connectors/ru.mnogo-reels/mnogoreels)
+  🔑 - Turn long videos into captioned vertical shorts, transcripts and articles with your own API key.
 ```
 
 ## 7. Smithery
@@ -254,6 +256,8 @@ Before submitting, run `claude plugin validate plugins/mnogoreels` and `claude p
   - Config: the remote `mcpServers` block from item 11
 
 ## 15. Goose extensions directory
+
+Retired: Goose no longer accepts third-party entries in `servers.json` and reads the official MCP Registry instead (https://github.com/aaif-goose/goose/discussions/10830). Kept for reference.
 
 Pull request to the Goose repository adding this entry to `documentation/static/servers.json` (keep the file's ordering):
 
