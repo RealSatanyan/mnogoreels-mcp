@@ -9,6 +9,10 @@ on:
         description: 'First-release bootstrap: verify and push only ghcr.io/realsatanyan/mnogoreels-mcp:0.0.0-bootstrap'
         type: boolean
         default: false
+      npm_only:
+        description: 'Publish the version on main to npm only (a tagged release whose npm job failed)'
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -90,7 +94,7 @@ jobs:
 
   npm:
     needs: verify
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || inputs.npm_only
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: release
@@ -117,7 +121,7 @@ jobs:
             echo "::notice::mnogoreels-mcp@$VERSION is already on npm; skipping the publish"
             exit 0
           fi
-          npm publish "./$TARBALL" --provenance --access public --tag "$DIST_TAG"
+          npm publish "./$TARBALL" --provenance --access public --tag "$DIST_TAG" --loglevel verbose
 
   image:
     needs: verify
